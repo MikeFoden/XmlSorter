@@ -1,0 +1,102 @@
+﻿<Window x:Class="XmlSorter.WindowMain"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="XML Sorter" Height="630" Width="525" Loaded="Window_Loaded" Padding="5" WindowStartupLocation="CenterScreen" MinWidth="525" MinHeight="630" Icon="/XmlSorter;component/Images/XML.ico">
+    <Grid Margin="5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <GroupBox Grid.Row="0" Grid.Column="0" Header="Source" Padding="5" Grid.ColumnSpan="2" Name="GroupBoxSource">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"></RowDefinition>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Label Grid.Row="0" Grid.Column="0" Content="Path:" VerticalContentAlignment="Center" VerticalAlignment="Center"></Label>
+                <TextBlock Grid.Row="0" Grid.Column="1" HorizontalAlignment="Stretch" Name="TextBlockSouurcePath" VerticalAlignment="Center"></TextBlock>
+                <Button Grid.Row="0" Grid.Column="2" Content="..." Width="40" HorizontalAlignment="Center" VerticalAlignment="Center" Name="ButtonSourceBrowse" Click="ButtonSourceBrowse_Click"></Button>
+            </Grid>
+        </GroupBox>
+        <GroupBox Grid.Row="1" Grid.Column="0" Header="Target" Padding="5" IsEnabled="False" Grid.ColumnSpan="2" Name="GroupBoxTarget">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"></RowDefinition>
+                    <RowDefinition Height="*"></RowDefinition>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <CheckBox Grid.Row="0" Grid.Column="0" Content="Overwrite source file" Grid.ColumnSpan="2" Name="CheckBoxOverwriteSourceFile" Checked="CheckBoxOverwriteSourceFile_Checked" Unchecked="CheckBoxOverwriteSourceFile_Checked"></CheckBox>
+                <Label Grid.Row="1" Grid.Column="0" Content="Path:" VerticalAlignment="Center" VerticalContentAlignment="Center" Name="LabelTargetPath"></Label>
+                <TextBlock Grid.Row="1" Grid.Column="1" HorizontalAlignment="Stretch" Name="TextBlockTargetPath" VerticalAlignment="Center"></TextBlock>
+                <Button Grid.Row="1" Grid.Column="2" Content="..." Width="40" HorizontalAlignment="Center" VerticalAlignment="Center" Name="ButtonTargetBrowse" Click="ButtonTargetBrowse_Click"></Button>
+            </Grid>
+        </GroupBox>
+        <GroupBox Grid.Row="2" Grid.Column="0" Header="Options" Padding="5" IsEnabled="False" Grid.ColumnSpan="2" Name="GroupBoxOptions">
+            <Grid >
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <CheckBox Content="Sort by tag name" Grid.ColumnSpan="2" VerticalAlignment="Center" IsChecked="True" Name="CheckBoxSortByTagName" Margin="0,5" Checked="CheckBoxSortByTagName_Checked" Unchecked="CheckBoxSortByTagName_Checked" />
+                <CheckBox Grid.Row="1" Content="Sort by specific attributes" Grid.ColumnSpan="2" VerticalAlignment="Center" Name="CheckBoxSortBySpecificAttributes" Checked="CheckBoxSortBySpecificAttributes_Checked" Unchecked="CheckBoxSortBySpecificAttributes_Checked" Margin="0,5" />
+                <CheckBox Grid.Row="2" Content="Sort attributes" Grid.ColumnSpan="2" VerticalAlignment="Center" Name="CheckBoxSortAttributes" Margin="0,5" Checked="CheckBoxSortAttributes_Checked" Unchecked="CheckBoxSortAttributes_Checked" />
+                <Button Content="..." Grid.Row="1" Grid.Column="1" Width="40" HorizontalAlignment="Center" VerticalAlignment="Center" IsEnabled="False" Name="ButtonSelectAttributes" Click="ButtonSelectAttributes_Click" />
+            </Grid>
+        </GroupBox>
+        <GroupBox Grid.Row="3" Grid.Column="0" Header="Actions" Padding="5" IsEnabled="False" Grid.ColumnSpan="2" Name="GroupBoxActions">
+            <Grid >
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Button Content="Sort" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center" Name="ButtonSort" Click="ButtonSort_Click" Margin="0,5,5,5" Width="50" IsEnabled="False" />
+                <Button Content="Save" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Name="ButtonSave" Margin="0,5,5,5" Click="ButtonSave_Click" Width="50" />
+            </Grid>
+        </GroupBox>
+        <GroupBox Grid.Row="4" Grid.Column="0" Header="Preview" IsEnabled="False" Grid.ColumnSpan="2" Name="GroupBoxPreview">
+            <Grid >
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <GroupBox Grid.Row="0" Grid.Column="0" Header="Before" Padding="5" Margin="5">
+                    <WebBrowser Grid.Row="0" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Name="WebBrowserBefore" Navigating="WebBrowserBefore_Navigating" />
+                </GroupBox>
+                <GroupBox Grid.Row="0" Grid.Column="2" Header="After" Padding="5" Margin="5">
+                    <WebBrowser Grid.Row="0" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Name="WebBrowserAfter" Navigating="WebBrowserAfter_Navigating" />
+                </GroupBox>
+                <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Center" VerticalAlignment="Center" Height="200">
+                </GridSplitter>
+            </Grid>
+        </GroupBox>
+
+    </Grid>
+</Window>
