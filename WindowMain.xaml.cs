@@ -7,16 +7,17 @@ using System.Windows.Navigation;
 using System.Xml;
 using System.Xml.Linq;
 using Microsoft.Win32;
-using IOPath = System.IO.Path;
 using XmlSorter.DataObjects;
 using XmlSorter.Helpers;
+using IOPath = System.IO.Path;
 
 namespace XmlSorter
 {
-    /// <summary>
-    /// Startup and main window of the application
-    /// </summary>
-    public partial class WindowMain : Window
+  /// <summary>
+  /// Startup and main window of the application
+  /// </summary>
+  /// <author>Originally created by Abdulhamed Shalaby</author>
+  public partial class WindowMain : Window
     {
         #region Fields
 
@@ -75,11 +76,9 @@ namespace XmlSorter
 
         private void ButtonTargetBrowse_Click(object sender, RoutedEventArgs e)
         {
-            if(ShowSaveDialog())
-            {
-                TextBlockTargetPath.Text = _saveFileDialogInstance.FileName;
-                MaintainControlsAvailability();
-            }
+          if (!ShowSaveDialog()) { return; }
+          TextBlockTargetPath.Text = _saveFileDialogInstance.FileName;
+            MaintainControlsAvailability();
         }
 
         private void CheckBoxSortBySpecificAttributes_Checked(object sender, RoutedEventArgs e)
@@ -119,7 +118,7 @@ namespace XmlSorter
 
         private void WebBrowserAfter_Navigating(object sender, NavigatingCancelEventArgs e)
         {
-            if(_clearRigthBrowser)
+            if (_clearRigthBrowser)
             {
                 _clearRigthBrowser = false;
             }
@@ -134,7 +133,7 @@ namespace XmlSorter
         {
             System.IO.File.Copy(_tempTargetFilePath, TextBlockTargetPath.Text, true);
         }
-       
+
         #endregion
 
         #region Helper Functions
@@ -184,7 +183,7 @@ namespace XmlSorter
             const string stringXPath = "//@*";
             foreach(XmlAttribute att in doc.SelectNodes(stringXPath))
             {
-                _attributesBindingInstance.Add(att.Name);
+              _attributesBindingInstance?.Add(att.Name);
             }
             _isAttributesBeingRead = false;
         }

@@ -4,7 +4,8 @@ using System.Windows.Controls;
 
 namespace XmlSorter.Helpers
 {
-    public static class Extensions
+  /// <author>Originally created by Abdulhamed Shalaby</author>
+  public static class Extensions
     {
         public static string GetBrowserSafeUri(this Uri uriInstance)
         {
