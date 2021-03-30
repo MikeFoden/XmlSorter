@@ -5,7 +5,8 @@ using System.Text;
 
 namespace XmlSorter.DataObjects
 {
-    [Serializable, StructLayout(LayoutKind.Sequential)]
+  /// <author>Originally created by Abdulhamed Shalaby</author>
+  [Serializable, StructLayout(LayoutKind.Sequential)]
     public class KeyValuePairEx<TKey, TValue> : INotifyPropertyChanged, ICloneable
     {
       private TValue value;
@@ -33,12 +34,12 @@ namespace XmlSorter.DataObjects
             builder.Append('[');
             if (Key != null)
             {
-                builder.Append(Key.ToString());
+                builder.Append(Key);
             }
             builder.Append(", ");
             if (Value != null)
             {
-                builder.Append(Value.ToString());
+                builder.Append(Value);
             }
             builder.Append(']');
             return builder.ToString();

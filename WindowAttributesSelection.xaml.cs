@@ -7,6 +7,7 @@ namespace XmlSorter
   /// <summary>
   /// Sorting attributes selection window.
   /// </summary>
+  /// <author>Originally created by Abdulhamed Shalaby</author>
   public partial class WindowAttributesSelection : Window
     {
         #region Constructors

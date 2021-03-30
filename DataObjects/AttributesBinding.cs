@@ -5,6 +5,7 @@ using System.Threading;
 
 namespace XmlSorter.DataObjects
 {
+  /// <author>Originally created by Abdulhamed Shalaby</author>
   public class AttributesBinding : ObservableCollection<KeyValuePairEx<string, bool>>
     {
         private readonly SynchronizationContext _synchronizationContext = SynchronizationContext.Current;
