@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 using System.Windows;
@@ -22,16 +20,16 @@ namespace XmlSorter
     {
         #region Fields
 
-        string TempSourceFilePath;
-        string TempTargetFilePath;
-        string OriginalSourceFilePath;
-        OpenFileDialog OpenFileDialogInstance;
-        SaveFileDialog SaveFileDialogInstance;
-        volatile bool IsAttributesBeingRead;
-        bool ClearRigthBrowser;
-        WindowAttributesSelection WindowAttributesSelectionInstance;
-        AttributesBinding AttributesBindingInstance = new AttributesBinding();
-        IEnumerable<string> FilteredSortingAttibutes;
+        private string _tempSourceFilePath;
+        private string _tempTargetFilePath;
+        private string _originalSourceFilePath;
+        private OpenFileDialog _openFileDialogInstance;
+        private SaveFileDialog _saveFileDialogInstance;
+        private volatile bool _isAttributesBeingRead;
+        private bool _clearRigthBrowser;
+        private WindowAttributesSelection _windowAttributesSelectionInstance;
+        private readonly AttributesBinding _attributesBindingInstance = new AttributesBinding();
+        private IEnumerable<string> _filteredSortingAttibutes;
 
         #endregion
 
@@ -53,22 +51,21 @@ namespace XmlSorter
 
         private void ButtonSourceBrowse_Click(object sender, RoutedEventArgs e)
         {
-            if(ShowOpenDialog())
-            {
-                TextBlockSouurcePath.Text = OpenFileDialogInstance.FileName;
-                OriginalSourceFilePath = OpenFileDialogInstance.FileName;
-                TempSourceFilePath = IOPath.Combine(IOPath.GetTempPath(), "Source.xml");
-                TempTargetFilePath = IOPath.Combine(IOPath.GetTempPath(), "Target.xml");
-                MaintainControlsAvailability();
-                ClearRigthBrowser = true;
-                WebBrowserAfter.NavigateToString("<HTML></HTML>");
-                new Thread(ReadAttributes).Start();
-            }
+          if (!ShowOpenDialog()) { return; }
+
+          TextBlockSouurcePath.Text = _openFileDialogInstance.FileName;
+          _originalSourceFilePath = _openFileDialogInstance.FileName;
+          _tempSourceFilePath = IOPath.Combine(IOPath.GetTempPath(), "Source.xml");
+          _tempTargetFilePath = IOPath.Combine(IOPath.GetTempPath(), "Target.xml");
+          MaintainControlsAvailability();
+          _clearRigthBrowser = true;
+          WebBrowserAfter.NavigateToString("<HTML></HTML>");
+          new Thread(ReadAttributes).Start();
         }
 
         private void OpenFileDialogInstance_FileOk(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            e.Cancel = !ValidateXml(OpenFileDialogInstance.FileName);
+            e.Cancel = !ValidateXml(_openFileDialogInstance.FileName);
         }
 
         private void CheckBoxOverwriteSourceFile_Checked(object sender, RoutedEventArgs e)
@@ -80,7 +77,7 @@ namespace XmlSorter
         {
             if(ShowSaveDialog())
             {
-                TextBlockTargetPath.Text = SaveFileDialogInstance.FileName;
+                TextBlockTargetPath.Text = _saveFileDialogInstance.FileName;
                 MaintainControlsAvailability();
             }
         }
@@ -107,33 +104,35 @@ namespace XmlSorter
 
         private void ButtonSort_Click(object sender, RoutedEventArgs e)
         {
-            FilteredSortingAttibutes = AttributesBindingInstance.GetSelected();
-            XElement xe = XElement.Load(TempSourceFilePath);
+            _filteredSortingAttibutes = _attributesBindingInstance.GetSelected();
+            var xe = XElement.Load(_tempSourceFilePath);
             SortElement(xe);
-            xe.Save(TempTargetFilePath);
-            WebBrowserAfter.NavigateSafely(TempTargetFilePath);
+            xe.Save(_tempTargetFilePath);
+            WebBrowserAfter.NavigateSafely(_tempTargetFilePath);
         }
 
         private void WebBrowserBefore_Navigating(object sender, NavigatingCancelEventArgs e)
         {
-            e.Cancel = e.Uri.GetBrowserSafeUri().ToLower() != new Uri(TempSourceFilePath).GetBrowserSafeUri().ToLower();
+            e.Cancel = !string.Equals(e.Uri.GetBrowserSafeUri(),
+              new Uri(_tempSourceFilePath).GetBrowserSafeUri(), StringComparison.CurrentCultureIgnoreCase);
         }
 
         private void WebBrowserAfter_Navigating(object sender, NavigatingCancelEventArgs e)
         {
-            if(ClearRigthBrowser)
+            if(_clearRigthBrowser)
             {
-                ClearRigthBrowser = false;
+                _clearRigthBrowser = false;
             }
             else
             {
-                e.Cancel = e.Uri.GetBrowserSafeUri().ToLower() != new Uri(TempTargetFilePath).GetBrowserSafeUri().ToLower();
+                e.Cancel = !string.Equals(e.Uri.GetBrowserSafeUri(),
+                  new Uri(_tempTargetFilePath).GetBrowserSafeUri(), StringComparison.CurrentCultureIgnoreCase);
             }
         }
 
         private void ButtonSave_Click(object sender, RoutedEventArgs e)
         {
-            System.IO.File.Copy(TempTargetFilePath, TextBlockTargetPath.Text, true);
+            System.IO.File.Copy(_tempTargetFilePath, TextBlockTargetPath.Text, true);
         }
        
         #endregion
@@ -142,23 +141,23 @@ namespace XmlSorter
 
         private void SortElement(XElement xe)
         {
-            IEnumerable<XNode> NodesToBePreserved = xe.Nodes().Where(P => P.GetType() != typeof(XElement));
+            var nodesToBePreserved = xe.Nodes().Where(p => p.GetType() != typeof(XElement));
             if(CheckBoxSortAttributes.IsChecked.Value)
             {
                 xe.ReplaceAttributes(xe.Attributes().OrderBy(x => x.Name.LocalName));
             }
-            if(!CheckBoxSortBySpecificAttributes.IsChecked.Value || FilteredSortingAttibutes.Count() == 0)
+            if(!CheckBoxSortBySpecificAttributes.IsChecked.Value || !_filteredSortingAttibutes.Any())
             {
-                xe.ReplaceNodes((xe.Elements().OrderBy(x => x.Name.LocalName).Union((NodesToBePreserved).OrderBy(P => P.ToString()))).OrderBy(N => N.NodeType.ToString()));
+                xe.ReplaceNodes((xe.Elements().OrderBy(x => x.Name.LocalName).Union((nodesToBePreserved).OrderBy(p => p.ToString()))).OrderBy(n => n.NodeType.ToString()));
             }
             else
             {
-                foreach(string Att in FilteredSortingAttibutes)
+                foreach(var att in _filteredSortingAttibutes)
                 {
-                    xe.ReplaceNodes((xe.Elements().OrderBy(x => x.Name.LocalName).ThenBy(x => (string)x.Attribute(Att)).Union((NodesToBePreserved).OrderBy(P => P.ToString()))).OrderBy(N => N.NodeType.ToString()));
+                    xe.ReplaceNodes((xe.Elements().OrderBy(x => x.Name.LocalName).ThenBy(x => (string)x.Attribute(att)).Union((nodesToBePreserved).OrderBy(p => p.ToString()))).OrderBy(n => n.NodeType.ToString()));
                 }
             }
-            foreach(XElement xc in xe.Elements())
+            foreach(var xc in xe.Elements())
             {
                 SortElement(xc);
             }
@@ -166,67 +165,67 @@ namespace XmlSorter
 
         private void ReadAttributes()
         {
-            IsAttributesBeingRead = true;
-            if(AttributesBindingInstance != null)
+            _isAttributesBeingRead = true;
+            if(_attributesBindingInstance != null)
             {
                 Dispatcher.BeginInvoke(new System.Windows.Forms.MethodInvoker(delegate
                     {
-                        AttributesBindingInstance.Clear();
+                        _attributesBindingInstance.Clear();
                     }));
             }
-            XElement xe = XElement.Load(OriginalSourceFilePath);
-            xe.Save(TempSourceFilePath);
+            var xe = XElement.Load(_originalSourceFilePath);
+            xe.Save(_tempSourceFilePath);
             Dispatcher.BeginInvoke(new System.Windows.Forms.MethodInvoker(delegate
                 {
-                    WebBrowserBefore.NavigateSafely(TempSourceFilePath);
+                    WebBrowserBefore.NavigateSafely(_tempSourceFilePath);
                 }));
-            XmlDocument doc = new XmlDocument();
-            doc.Load(TempSourceFilePath);
-            string stringXPath = "//@*";
+            var doc = new XmlDocument();
+            doc.Load(_tempSourceFilePath);
+            const string stringXPath = "//@*";
             foreach(XmlAttribute att in doc.SelectNodes(stringXPath))
             {
-                AttributesBindingInstance.Add(att.Name);
+                _attributesBindingInstance.Add(att.Name);
             }
-            IsAttributesBeingRead = false;
+            _isAttributesBeingRead = false;
         }
 
         private void SelectAttributes()
         {
-            while(IsAttributesBeingRead)
+            while(_isAttributesBeingRead)
             {
 
             }
-            if(WindowAttributesSelectionInstance == null)
+            if(_windowAttributesSelectionInstance == null)
             {
-                WindowAttributesSelectionInstance = new WindowAttributesSelection(AttributesBindingInstance);
-                WindowAttributesSelectionInstance.IsVisibleChanged += new DependencyPropertyChangedEventHandler(delegate
+                _windowAttributesSelectionInstance = new WindowAttributesSelection(_attributesBindingInstance);
+                _windowAttributesSelectionInstance.IsVisibleChanged += new DependencyPropertyChangedEventHandler(delegate
                     {
                         MaintainControlsAvailability();
                     });
             }
-            WindowAttributesSelectionInstance.Show(this);
+            _windowAttributesSelectionInstance.Show(this);
             MaintainControlsAvailability();
         }
 
         private bool ShowOpenDialog()
         {
-            if(OpenFileDialogInstance == null)
+            if(_openFileDialogInstance == null)
             {
-                OpenFileDialogInstance = new OpenFileDialog();
-                OpenFileDialogInstance.FileOk += new System.ComponentModel.CancelEventHandler(OpenFileDialogInstance_FileOk);
+                _openFileDialogInstance = new OpenFileDialog();
+                _openFileDialogInstance.FileOk += new System.ComponentModel.CancelEventHandler(OpenFileDialogInstance_FileOk);
             }
-            bool? Result = OpenFileDialogInstance.ShowDialog();
-            return Result.HasValue && Result.Value;
+            var result = _openFileDialogInstance.ShowDialog();
+            return result.HasValue && result.Value;
         }
 
         private bool ShowSaveDialog()
         {
-            if(SaveFileDialogInstance == null)
+            if(_saveFileDialogInstance == null)
             {
-                SaveFileDialogInstance = new SaveFileDialog();
+                _saveFileDialogInstance = new SaveFileDialog();
             }
-            bool? Result = SaveFileDialogInstance.ShowDialog();
-            return Result.HasValue && Result.Value;
+            var result = _saveFileDialogInstance.ShowDialog();
+            return result.HasValue && result.Value;
         }
 
         private void MaintainControlsAvailability()
@@ -240,25 +239,25 @@ namespace XmlSorter
             LabelTargetPath.IsEnabled = !CheckBoxOverwriteSourceFile.IsChecked.Value;
             TextBlockTargetPath.IsEnabled = !CheckBoxOverwriteSourceFile.IsChecked.Value;
             ButtonTargetBrowse.IsEnabled = !CheckBoxOverwriteSourceFile.IsChecked.Value;
-            TextBlockTargetPath.Text = (CheckBoxOverwriteSourceFile.IsChecked.Value) ? TextBlockSouurcePath.Text : (SaveFileDialogInstance == null) ? string.Empty : SaveFileDialogInstance.FileName;
+            TextBlockTargetPath.Text = (CheckBoxOverwriteSourceFile.IsChecked.Value) ? TextBlockSouurcePath.Text : (_saveFileDialogInstance == null) ? string.Empty : _saveFileDialogInstance.FileName;
 
             GroupBoxOptions.IsEnabled = GroupBoxTarget.IsEnabled;
             GroupBoxPreview.IsEnabled = GroupBoxTarget.IsEnabled;
-            ButtonSelectAttributes.IsEnabled = CheckBoxSortBySpecificAttributes.IsChecked.Value && (WindowAttributesSelectionInstance == null || !WindowAttributesSelectionInstance.IsVisible);
+            ButtonSelectAttributes.IsEnabled = CheckBoxSortBySpecificAttributes.IsChecked.Value && (_windowAttributesSelectionInstance == null || !_windowAttributesSelectionInstance.IsVisible);
             GroupBoxActions.IsEnabled = TextBlockSouurcePath.Text.Length > 0;
             ButtonSort.IsEnabled = CheckBoxSortByTagName.IsChecked.Value || CheckBoxSortAttributes.IsChecked.Value || CheckBoxSortBySpecificAttributes.IsChecked.Value;
             ButtonSave.IsEnabled = TextBlockTargetPath.Text.Length > 0;
-            if(!CheckBoxSortBySpecificAttributes.IsChecked.Value && WindowAttributesSelectionInstance != null && WindowAttributesSelectionInstance.IsVisible)
+            if(!CheckBoxSortBySpecificAttributes.IsChecked.Value && _windowAttributesSelectionInstance != null && _windowAttributesSelectionInstance.IsVisible)
             {
-                WindowAttributesSelectionInstance.Hide();
+                _windowAttributesSelectionInstance.Hide();
             }
         }
 
-        private bool ValidateXml(string FilePath)
+        private static bool ValidateXml(string filePath)
         {
             try
             {
-                new XmlDocument().Load(FilePath);
+                new XmlDocument().Load(filePath);
                 return true;
             }
             catch
