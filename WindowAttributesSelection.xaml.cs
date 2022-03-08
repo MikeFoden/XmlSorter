@@ -1,20 +1,21 @@
-﻿using System.ComponentModel;
+﻿using System.Collections;
+using System.ComponentModel;
 using System.Windows;
-using XmlSorter.DataObjects;
 
 namespace XmlSorter
 {
-	/// <summary>
-	/// Sorting attributes selection window.
-	/// </summary>
-	public partial class WindowAttributesSelection : Window
+  /// <summary>
+  /// Sorting attributes selection window.
+  /// </summary>
+  /// <author>Originally created by Abdulhamed Shalaby</author>
+  public partial class WindowAttributesSelection : Window
     {
         #region Constructors
 
-        public WindowAttributesSelection(AttributesBinding AttributesBindingInstance)
+        public WindowAttributesSelection(IEnumerable attributesBindingInstance)
         {
-            this.InitializeComponent();
-            ListBoxAttributes.ItemsSource = AttributesBindingInstance;
+            InitializeComponent();
+            ListBoxAttributes.ItemsSource = attributesBindingInstance;
             ListBoxAttributes.Items.SortDescriptions.Add(new SortDescription("Key", ListSortDirection.Ascending));
         }
 
@@ -25,7 +26,6 @@ namespace XmlSorter
         private void ButtonOK_Click(object sender, RoutedEventArgs e)
         {
             Hide();
-            //Visibility = System.Windows.Visibility.Hidden;
         }
 
         private void Window_Closing(object sender, CancelEventArgs e)

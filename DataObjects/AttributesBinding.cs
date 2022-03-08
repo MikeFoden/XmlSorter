@@ -1,55 +1,48 @@
-﻿// -----------------------------------------------------------------------
-// <copyright file="AttributesBinding.cs" company="">
-// TODO: Update copyright text.
-// </copyright>
-// -----------------------------------------------------------------------
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 
 namespace XmlSorter.DataObjects
 {
-    /// <summary>
-    /// TODO: Update summary.
-    /// </summary>
-    public class AttributesBinding : ObservableCollection<KeyValuePairEx<string, bool>>
+  /// <author>Originally created by Abdulhamed Shalaby</author>
+  public class AttributesBinding : ObservableCollection<KeyValuePairEx<string, bool>>
     {
-        private SynchronizationContext _synchronizationContext = SynchronizationContext.Current;
-        public void Add(string Key)
+        private readonly SynchronizationContext _synchronizationContext = SynchronizationContext.Current;
+        public void Add(string key)
         {
-            Add(Key, false);
+            Add(key, false);
         }
-        public void Add(string Key, bool Value)
+        public void Add(string key, bool value)
         {
-            AddEx(new KeyValuePairEx<string, bool>(Key, Value));
+            AddEx(new KeyValuePairEx<string, bool>(key, value));
         }
-        public void AddEx(KeyValuePairEx<string, bool> KeyValuePairExInstance)
+        public void AddEx(KeyValuePairEx<string, bool> keyValuePairExInstance)
         {
-            if(SynchronizationContext.Current == _synchronizationContext)
+            if (SynchronizationContext.Current == _synchronizationContext)
             {
-                Add(KeyValuePairExInstance);
+                Add(keyValuePairExInstance);
             }
             else
             {
-                _synchronizationContext.Post(AddCore, KeyValuePairExInstance);
+                _synchronizationContext.Post(AddCore, keyValuePairExInstance);
             }
         }
         private void AddCore(object param)
         {
-            KeyValuePairEx<string, bool> KeyValuePairExInstance = (KeyValuePairEx<string, bool>)param;
-            if(!ContainsKey(KeyValuePairExInstance.Key))
+            var keyValuePairExInstance = (KeyValuePairEx<string, bool>)param;
+            if (!ContainsKey(keyValuePairExInstance.Key))
             {
-                Add(KeyValuePairExInstance);
+                Add(keyValuePairExInstance);
             }
         }
-        public bool ContainsKey(string Key)
+        public bool ContainsKey(string key)
         {
-            return this.Where(P => P.Key == Key).Count() > 0;
+            return this.Any(p => p.Key == key);
         }
         public IEnumerable<string> GetSelected()
         {
-            return this.Where(P => P.Value).Select(K => K.Key);
+            return this.Where(p => p.Value).Select(k => k.Key);
         }
     }
 }

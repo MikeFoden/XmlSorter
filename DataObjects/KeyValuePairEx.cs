@@ -1,60 +1,45 @@
-﻿// -----------------------------------------------------------------------
-// <copyright file="KeyValuePairEx.cs" company="">
-// TODO: Update copyright text.
-// </copyright>
-// -----------------------------------------------------------------------
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Text;
 
 namespace XmlSorter.DataObjects
 {
-    [Serializable, StructLayout(LayoutKind.Sequential)]
+  /// <author>Originally created by Abdulhamed Shalaby</author>
+  [Serializable, StructLayout(LayoutKind.Sequential)]
     public class KeyValuePairEx<TKey, TValue> : INotifyPropertyChanged, ICloneable
     {
-        private TKey key;
-        private TValue value;
+      private TValue value;
         public KeyValuePairEx(TKey key, TValue value)
         {
-            this.key = key;
+            Key = key;
             this.value = value;
         }
-        
-        public TKey Key
-        {
-            get
-            {
-                return this.key;
-            }
-        }
+
+        public TKey Key { get; }
+
         public TValue Value
         {
-            get
-            {
-                return this.value;
-            }
+            get => value;
             set
             {
-                if(!this.value.Equals(value))
-                {
-                    this.value = value;
-                    NotifyPropertyChanged("Value");
-                }
+              if (this.value.Equals(value)) { return; }
+              this.value = value;
+                NotifyPropertyChanged("Value");
             }
         }
         public override string ToString()
         {
-            StringBuilder builder = new StringBuilder();
+            var builder = new StringBuilder();
             builder.Append('[');
-            if (this.Key != null)
+            if (Key != null)
             {
-                builder.Append(this.Key.ToString());
+                builder.Append(Key);
             }
             builder.Append(", ");
-            if (this.Value != null)
+            if (Value != null)
             {
-                builder.Append(this.Value.ToString());
+                builder.Append(Value);
             }
             builder.Append(']');
             return builder.ToString();
@@ -62,17 +47,11 @@ namespace XmlSorter.DataObjects
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private void NotifyPropertyChanged(String PropertyName)
+        private void NotifyPropertyChanged(string propertyName)
         {
-            if(PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(PropertyName));
-            }
+          PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        public object Clone()
-        {
-            return new KeyValuePairEx<TKey, TValue>(Key, Value);
-        }
+        public object Clone() => new KeyValuePairEx<TKey, TValue>(Key, Value);
     }
 }
